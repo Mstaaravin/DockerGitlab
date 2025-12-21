@@ -1,0 +1,73 @@
+---
+services:
+  traefik:
+    image: traefik:v3
+    container_name: traefik
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--providers.file.directory=/etc/traefik/certs"
+      - "--providers.file.watch=true"
+      - "--serversTransport.insecureSkipVerify=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/certs:/etc/traefik/certs
+    environment:
+      - "TZ=${TZ}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.lan`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.services.traefik-docker.loadbalancer.server.port=8080"
+    restart: unless-stopped
+
+  gitlab:
+    image: 'gitlab/gitlab-ce:${VERSION}'
+    container_name: 'gitlab'
+    hostname: 'gitlab'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.lan'
+        gitlab_rails['gitlab_email_enabled'] = 'false'
+        gitlab_rails['gitlab_shell_ssh_port'] = '22'
+        gitlab_rails['time_zone'] = 'America/Argentina/Buenos_Aires'
+        gitlab_rails['gitlab_username_changing_enabled'] = 'false'
+        #gitlab_rails['gitlab_default_projects_features_issues'] = 'true'
+        #gitlab_rails['gitlab_default_projects_features_merge_requests'] = 'true'
+        #gitlab_rails['gitlab_default_projects_features_wiki'] = 'true'
+        #gitlab_rails['gitlab_default_projects_features_snippets'] = 'true'
+        #gitlab_rails['gitlab_default_projects_features_builds'] = 'true'
+        #gitlab_rails['gitlab_default_projects_features_container_registry'] = 'true'
+        gitlab_pages['enable'] = true
+    volumes:
+      - './${VERSION}/config:/etc/gitlab'
+      - './${VERSION}/logs:/var/log/gitlab'
+      - './${VERSION}/data:/var/opt/gitlab'
+      - './config/gitlab.rb:/etc/gitlab/gitlab.rb:ro'
+      - './config/certs/gitlab.lan-fullchain.crt:/etc/gitlab/ssl/gitlab.lan.crt:ro'
+      - './config/certs/gitlab.lan.key:/etc/gitlab/ssl/gitlab.lan.key:ro'
+    ports:
+      - '22:22'
+    expose:
+      - '22'
+      - '80'
+      - '443'
+    shm_size: '256m'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gitlab.rule=Host(`gitlab.lan`)"
+      - "traefik.http.routers.gitlab.entrypoints=websecure"
+      - "traefik.http.routers.gitlab.tls=true"
+      - "traefik.http.services.gitlab.loadbalancer.server.port=80"
+    restart: unless-stopped
