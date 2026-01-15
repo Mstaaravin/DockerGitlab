@@ -20,7 +20,7 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./config/certs:/etc/traefik/certs
+      - ./_shared/certs:/etc/traefik/certs
     environment:
       - "TZ=${TZ}"
     labels:
@@ -51,12 +51,12 @@ services:
         #gitlab_rails['gitlab_default_projects_features_container_registry'] = 'true'
         gitlab_pages['enable'] = true
     volumes:
-      - './${VERSION}/config:/etc/gitlab'
-      - './${VERSION}/logs:/var/log/gitlab'
-      - './${VERSION}/data:/var/opt/gitlab'
-      - './config/gitlab.rb:/etc/gitlab/gitlab.rb:ro'
-      - './config/certs/gitlab.lan-fullchain.crt:/etc/gitlab/ssl/gitlab.lan.crt:ro'
-      - './config/certs/gitlab.lan.key:/etc/gitlab/ssl/gitlab.lan.key:ro'
+      - './gitlab/config:/etc/gitlab'
+      - './gitlab/logs:/var/log/gitlab'
+      - './gitlab/data:/var/opt/gitlab'
+      - './_shared/gitlab.rb:/etc/gitlab/gitlab.rb:ro'
+      - './_shared/certs/gitlab.lan-fullchain.crt:/etc/gitlab/ssl/gitlab.lan.crt:ro'
+      - './_shared/certs/gitlab.lan.key:/etc/gitlab/ssl/gitlab.lan.key:ro'
     ports:
       - '22:22'
     expose:
