@@ -75,3 +75,37 @@ services:
       - "traefik.http.services.registry.loadbalancer.server.port=5005"
       - "traefik.http.routers.registry.service=registry"
     restart: unless-stopped
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    restart: unless-stopped
+    depends_on:
+      - gitlab
+    extra_hosts:
+      - "gitlab.lan:172.16.250.5"
+      - "registry.gitlab.lan:172.16.250.5"
+    environment:
+      - RUNNER_TOKEN=${RUNNER_TOKEN}
+    volumes:
+      - ./gitlab-runner/config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        if [ ! -s /etc/gitlab-runner/config.toml ]; then
+          echo ">>> Registering runner..."
+          gitlab-runner register \
+            --non-interactive \
+            --url "https://gitlab.lan" \
+            --token "$${RUNNER_TOKEN}" \
+            --executor docker \
+            --docker-image docker:27 \
+            --docker-privileged \
+            --docker-volumes /certs/client \
+            --docker-volumes /cache \
+            --tls-ca-file /etc/gitlab-runner/certs/gitlab.lan.crt \
+            --description docker-privileged-runner
+        fi
+        exec gitlab-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner
