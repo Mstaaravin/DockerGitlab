@@ -54,9 +54,6 @@ services:
       - './gitlab/config:/etc/gitlab'
       - './gitlab/logs:/var/log/gitlab'
       - './gitlab/data:/var/opt/gitlab'
-      - './_shared/gitlab.rb:/etc/gitlab/gitlab.rb:ro'
-      - './_shared/certs/gitlab.lan-fullchain.crt:/etc/gitlab/ssl/gitlab.lan.crt:ro'
-      - './_shared/certs/gitlab.lan.key:/etc/gitlab/ssl/gitlab.lan.key:ro'
     ports:
       - '22:22'
     expose:
