@@ -60,6 +60,7 @@ services:
       - '22'
       - '80'
       - '443'
+      - '5005'
     shm_size: '256m'
     labels:
       - "traefik.enable=true"
@@ -67,4 +68,9 @@ services:
       - "traefik.http.routers.gitlab.entrypoints=websecure"
       - "traefik.http.routers.gitlab.tls=true"
       - "traefik.http.services.gitlab.loadbalancer.server.port=80"
+      - "traefik.http.routers.registry.rule=Host(`registry.gitlab.lan`)"
+      - "traefik.http.routers.registry.entrypoints=websecure"
+      - "traefik.http.routers.registry.tls=true"
+      - "traefik.http.services.registry.loadbalancer.server.port=5005"
+      - "traefik.http.routers.registry.service=registry"
     restart: unless-stopped

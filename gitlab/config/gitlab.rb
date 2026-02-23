@@ -1027,7 +1027,9 @@ gitlab_rails['disable_animations'] = false
 ##! Docs: https://docs.gitlab.com/ee/administration/packages/container_registry.html
 ################################################################################
 
-# registry_external_url 'https://registry.example.com'
+registry_external_url 'https://registry.gitlab.lan'
+registry_nginx['listen_port'] = 5005
+registry_nginx['listen_https'] = false
 
 ### Settings used by GitLab application
 # gitlab_rails['registry_enabled'] = true
