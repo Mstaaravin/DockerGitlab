@@ -3620,3 +3620,34 @@ registry_nginx['listen_https'] = false
 # gitlab_backup_cli['group'] = 'gitlab-backup'
 # gitlab_backup_cli['dir'] = '/var/opt/gitlab/backups'
 # gitlab_backup_cli['additional_groups'] = %w[git gitlab-psql registry]
+
+################################################################################
+# Performance tuning — 8 CPU / 20GB RAM
+################################################################################
+
+# Puma (web server): 2 workers × 4 threads
+# Cada worker ~500MB RAM → 2 workers = ~1GB total
+puma['worker_processes'] = 2
+puma['min_threads'] = 1
+puma['max_threads'] = 4
+puma['per_worker_max_memory_mb'] = 1200
+
+# Sidekiq (background jobs): homelab no necesita alta concurrencia
+sidekiq['concurrency'] = 8
+
+# PostgreSQL
+postgresql['shared_buffers'] = "512MB"
+postgresql['work_mem'] = "16MB"
+postgresql['maintenance_work_mem'] = "64MB"
+postgresql['checkpoint_completion_target'] = 0.9
+postgresql['effective_cache_size'] = "4GB"
+
+# Servicios de monitoreo — desactivar los que no se usan
+# (ahorran ~300-400MB RAM en total)
+prometheus['enable'] = false
+alertmanager['enable'] = false
+gitlab_exporter['enable'] = false
+node_exporter['enable'] = false
+
+# GitLab KAS (Kubernetes Agent Server) — no aplica en homelab
+gitlab_kas['enable'] = false
