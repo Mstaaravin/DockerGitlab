@@ -109,3 +109,15 @@ services:
             --description docker-privileged-runner
         fi
         exec gitlab-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner
+
+  zabbix-agent:
+    image: zabbix/zabbix-agent2:latest
+    container_name: zabbix-agent2
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - ZBX_SERVER_HOST=${ZABBIX_SERVER}
+      - ZBX_HOSTNAME=ct-gitlab
+    extra_hosts:
+      - "zabbix.lan:${ZABBIX_SERVER}"
