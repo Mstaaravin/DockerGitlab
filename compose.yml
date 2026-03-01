@@ -80,6 +80,7 @@ services:
   gitlab-runner:
     image: gitlab/gitlab-runner:latest
     container_name: gitlab-runner
+    profiles: [runner]
     restart: unless-stopped
     depends_on:
       - gitlab
@@ -114,6 +115,7 @@ services:
   zabbix-agent:
     image: zabbix/zabbix-agent2:latest
     container_name: zabbix-agent2
+    profiles: [monitoring]
     ports:
       - "10050:10050"
     restart: unless-stopped
