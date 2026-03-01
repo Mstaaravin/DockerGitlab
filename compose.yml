@@ -25,7 +25,7 @@ services:
       - "TZ=${TZ}"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.lan`)"
+      - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_DOMAIN}`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.service=api@internal"
@@ -38,7 +38,8 @@ services:
     hostname: 'gitlab'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://gitlab.lan'
+        external_url 'https://${GITLAB_DOMAIN}'
+        registry_external_url 'https://${REGISTRY_DOMAIN}'
         gitlab_rails['gitlab_email_enabled'] = 'false'
         gitlab_rails['gitlab_shell_ssh_port'] = '22'
         gitlab_rails['time_zone'] = 'America/Argentina/Buenos_Aires'
@@ -64,12 +65,12 @@ services:
     shm_size: '256m'
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gitlab.rule=Host(`gitlab.lan`)"
+      - "traefik.http.routers.gitlab.rule=Host(`${GITLAB_DOMAIN}`)"
       - "traefik.http.routers.gitlab.entrypoints=websecure"
       - "traefik.http.routers.gitlab.tls=true"
       - "traefik.http.services.gitlab.loadbalancer.server.port=80"
       - "traefik.http.routers.gitlab.service=gitlab"
-      - "traefik.http.routers.registry.rule=Host(`registry.gitlab.lan`)"
+      - "traefik.http.routers.registry.rule=Host(`${REGISTRY_DOMAIN}`)"
       - "traefik.http.routers.registry.entrypoints=websecure"
       - "traefik.http.routers.registry.tls=true"
       - "traefik.http.services.registry.loadbalancer.server.port=5005"
@@ -83,8 +84,8 @@ services:
     depends_on:
       - gitlab
     extra_hosts:
-      - "gitlab.lan:172.16.250.5"
-      - "registry.gitlab.lan:172.16.250.5"
+      - "${GITLAB_DOMAIN}:${GITLAB_IP}"
+      - "${REGISTRY_DOMAIN}:${GITLAB_IP}"
     environment:
       - RUNNER_TOKEN=${RUNNER_TOKEN}
     volumes:
@@ -98,14 +99,14 @@ services:
           echo ">>> Registering runner..."
           gitlab-runner register \
             --non-interactive \
-            --url "https://gitlab.lan" \
+            --url "https://${GITLAB_DOMAIN}" \
             --token "$${RUNNER_TOKEN}" \
             --executor docker \
-            --docker-image docker:27 \
+            --docker-image ${RUNNER_DOCKER_IMAGE} \
             --docker-privileged \
             --docker-volumes /certs/client \
             --docker-volumes /cache \
-            --tls-ca-file /etc/gitlab-runner/certs/gitlab.lan.crt \
+            --tls-ca-file /etc/gitlab-runner/certs/${GITLAB_DOMAIN}.crt \
             --description docker-privileged-runner
         fi
         exec gitlab-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner

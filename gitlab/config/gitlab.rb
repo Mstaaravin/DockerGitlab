@@ -29,7 +29,7 @@
 ##! On AWS EC2 instances, we also attempt to fetch the public hostname/IP
 ##! address from AWS. For more details, see:
 ##! https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
-external_url 'http://gitlab.lan'
+## external_url is controlled by GITLAB_OMNIBUS_CONFIG in compose.yml
 
 ## Roles for multi-instance GitLab
 ##! The default is to have no roles enabled, which results in GitLab running as an all-in-one instance.
@@ -1027,7 +1027,7 @@ gitlab_rails['disable_animations'] = false
 ##! Docs: https://docs.gitlab.com/ee/administration/packages/container_registry.html
 ################################################################################
 
-registry_external_url 'https://registry.gitlab.lan'
+## registry_external_url is controlled by GITLAB_OMNIBUS_CONFIG in compose.yml
 registry_nginx['listen_port'] = 5005
 registry_nginx['listen_https'] = false
 
