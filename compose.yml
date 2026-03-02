@@ -43,6 +43,8 @@ services:
         nginx['listen_https'] = false
         nginx['listen_port'] = 80
         gitlab_pages['enable'] = true
+    # Only env-var-dependent URLs and reverse-proxy nginx overrides live here.
+    # All other GitLab settings are in ./gitlab/config/gitlab.rb (bind-mounted).
     volumes:
       - './gitlab/config:/etc/gitlab'
       - './gitlab/logs:/var/log/gitlab'
