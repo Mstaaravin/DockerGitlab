@@ -183,7 +183,7 @@ gitlab_rails['gitlab_username_changing_enabled'] = false
 
 ### Gravatar Settings
 # gitlab_rails['gravatar_plain_url'] = 'http://www.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon'
-gitlab_rails['gravatar_ssl_url'] = 'https://secure.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon'
+# gitlab_rails['gravatar_ssl_url'] = 'https://secure.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon'
 
 ### Auxiliary jobs
 ###! Periodically executed jobs, to self-heal Gitlab, do external
@@ -527,10 +527,10 @@ gitlab_rails['gravatar_ssl_url'] = 'https://secure.gravatar.com/avatar/%{hash}?s
 # gitlab_rails['pages_local_store_path'] = "/var/opt/gitlab/gitlab-rails/shared/pages"
 
 ### Impersonation settings
-gitlab_rails['impersonation_enabled'] = true
+# gitlab_rails['impersonation_enabled'] = true
 
 ### Disable jQuery and CSS animations
-gitlab_rails['disable_animations'] = false
+# gitlab_rails['disable_animations'] = false
 
 ### Application settings cache expiry in seconds. (default: 60)
 # gitlab_rails['application_settings_cache_seconds'] = 60

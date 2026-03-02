@@ -42,7 +42,6 @@ services:
         registry_external_url 'https://${REGISTRY_DOMAIN}'
         nginx['listen_https'] = false
         nginx['listen_port'] = 80
-        gitlab_rails['gitlab_shell_ssh_port'] = '22'
         gitlab_pages['enable'] = true
     volumes:
       - './gitlab/config:/etc/gitlab'
