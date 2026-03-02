@@ -105,4 +105,6 @@ services:
             --description docker-privileged-runner
         fi
         exec gitlab-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner
+    # config.toml is auto-generated on first start via the entrypoint above.
+    # The only required secret is RUNNER_TOKEN in .env (Admin > CI/CD > Runners).
 
