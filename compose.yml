@@ -42,16 +42,7 @@ services:
         registry_external_url 'https://${REGISTRY_DOMAIN}'
         nginx['listen_https'] = false
         nginx['listen_port'] = 80
-        gitlab_rails['gitlab_email_enabled'] = 'false'
         gitlab_rails['gitlab_shell_ssh_port'] = '22'
-        gitlab_rails['time_zone'] = 'America/Argentina/Buenos_Aires'
-        gitlab_rails['gitlab_username_changing_enabled'] = 'false'
-        #gitlab_rails['gitlab_default_projects_features_issues'] = 'true'
-        #gitlab_rails['gitlab_default_projects_features_merge_requests'] = 'true'
-        #gitlab_rails['gitlab_default_projects_features_wiki'] = 'true'
-        #gitlab_rails['gitlab_default_projects_features_snippets'] = 'true'
-        #gitlab_rails['gitlab_default_projects_features_builds'] = 'true'
-        #gitlab_rails['gitlab_default_projects_features_container_registry'] = 'true'
         gitlab_pages['enable'] = true
     volumes:
       - './gitlab/config:/etc/gitlab'
