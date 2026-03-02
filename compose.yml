@@ -36,6 +36,8 @@ services:
     image: 'gitlab/gitlab-ce:${VERSION}'
     container_name: 'gitlab'
     hostname: 'gitlab'
+    # Only env-var-dependent URLs and reverse-proxy nginx overrides live here.
+    # All other GitLab settings are in ./gitlab/config/gitlab.rb (bind-mounted).
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'https://${GITLAB_DOMAIN}'
@@ -43,8 +45,6 @@ services:
         nginx['listen_https'] = false
         nginx['listen_port'] = 80
         gitlab_pages['enable'] = true
-    # Only env-var-dependent URLs and reverse-proxy nginx overrides live here.
-    # All other GitLab settings are in ./gitlab/config/gitlab.rb (bind-mounted).
     volumes:
       - './gitlab/config:/etc/gitlab'
       - './gitlab/logs:/var/log/gitlab'
@@ -75,18 +75,7 @@ services:
     image: gitlab/gitlab-runner:latest
     container_name: gitlab-runner
     profiles: [runner]
-    restart: unless-stopped
-    depends_on:
-      - gitlab
-    extra_hosts:
-      - "${GITLAB_DOMAIN}:${GITLAB_IP}"
-      - "${REGISTRY_DOMAIN}:${GITLAB_IP}"
-    environment:
-      - RUNNER_TOKEN=${RUNNER_TOKEN}
-    volumes:
-      - ./gitlab-runner/config:/etc/gitlab-runner
-      - /var/run/docker.sock:/var/run/docker.sock
-    entrypoint: ["/bin/bash", "-c"]
+    # config.toml is auto-generated on first start via the entrypoint above.
     command:
       - |
         set -e
@@ -105,6 +94,16 @@ services:
             --description docker-privileged-runner
         fi
         exec gitlab-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner
-    # config.toml is auto-generated on first start via the entrypoint above.
-    # The only required secret is RUNNER_TOKEN in .env (Admin > CI/CD > Runners).
-
+    depends_on:
+      - gitlab
+    extra_hosts:
+      - "${GITLAB_DOMAIN}:${GITLAB_IP}"
+      - "${REGISTRY_DOMAIN}:${GITLAB_IP}"
+    # The only required secret is RUNNER_TOKEN in .env (Admin > CI/CD > Runners and get token).
+    environment:
+      - RUNNER_TOKEN=${RUNNER_TOKEN}
+    volumes:
+      - ./gitlab-runner/config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: ["/bin/bash", "-c"]
+    restart: unless-stopped
