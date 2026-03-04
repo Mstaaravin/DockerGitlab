@@ -4,11 +4,23 @@ Docker Compose setup for a self-hosted GitLab CE instance with Traefik as revers
 
 ## Services
 
+### Core services
+
 | Service | Description |
 |---------|-------------|
-| GitLab CE | Core GitLab application |
-| Traefik v3 | Reverse proxy with TLS termination |
-| GitLab Runner | CI/CD runner (optional, via `COMPOSE_PROFILES=runner`) |
+| `gitlab` | GitLab CE — git hosting, merge requests, CI/CD orchestration, Container Registry |
+| `traefik` | Reverse proxy — TLS termination, routing to `GITLAB_DOMAIN` and `REGISTRY_DOMAIN` |
+
+### GitLab Runner
+
+| | |
+|---|---|
+| Profile | opt-in via `COMPOSE_PROFILES=runner` |
+| Executor | Docker privileged (Docker-in-Docker) |
+| Registration | Automatic on first start using `RUNNER_TOKEN` |
+| Config file | `gitlab-runner/config/config.toml` — auto-generated, not tracked in git |
+
+See [doc/RUNNER.md](doc/RUNNER.md) for token setup, TLS requirements, and re-registration.
 
 ## Requirements
 
@@ -74,5 +86,4 @@ Everything else — SMTP, LDAP, backup schedules, feature flags, resource limits
 
 ## Notes
 
-- Runner auto-registers on first start using `RUNNER_TOKEN`; its `config.toml` is generated automatically and not tracked in git.
 - `gitlab/data/`, `gitlab/logs/`, and all secrets are excluded from git via `.gitignore`.
