@@ -46,8 +46,33 @@ Docker Compose setup for a self-hosted GitLab CE instance with Traefik as revers
    docker compose --profile runner up -d
    ```
 
+## Configuration split: `GITLAB_OMNIBUS_CONFIG` vs `gitlab.rb`
+
+GitLab CE reads configuration from two sources, applied in this order:
+
+1. `GITLAB_OMNIBUS_CONFIG` (environment variable in `compose.yml`) — prepended first.
+2. `gitlab/config/gitlab.rb` (bind-mounted file) — appended after, so it takes precedence for any duplicate keys.
+
+**What goes in `GITLAB_OMNIBUS_CONFIG`:**
+
+```ruby
+external_url 'https://${GITLAB_DOMAIN}'
+registry_external_url 'https://${REGISTRY_DOMAIN}'
+nginx['listen_https'] = false
+nginx['listen_port'] = 80
+gitlab_pages['enable'] = true
+```
+
+These settings live here for two reasons:
+
+- **Variable interpolation:** Docker Compose substitutes `${GITLAB_DOMAIN}` and `${REGISTRY_DOMAIN}` from `.env` before the container starts. `gitlab.rb` is a static file committed to git and has no access to `.env` variables.
+- **Topology:** The nginx overrides (`listen_https = false`, `listen_port = 80`) are deployment-specific — they tell GitLab's internal nginx to speak plain HTTP because Traefik handles TLS termination externally. They belong with the other deployment-time settings, not in the general application config.
+
+**What goes in `gitlab.rb`:**
+
+Everything else — SMTP, LDAP, backup schedules, feature flags, resource limits, etc. These are static values that don't depend on `.env` and represent the GitLab application configuration rather than the deployment topology.
+
 ## Notes
 
-- GitLab is configured primarily via `gitlab/config/gitlab.rb` (bind-mounted).
 - Runner auto-registers on first start using `RUNNER_TOKEN`; its `config.toml` is generated automatically and not tracked in git.
 - `gitlab/data/`, `gitlab/logs/`, and all secrets are excluded from git via `.gitignore`.
