@@ -1,4 +1,0 @@
-[tls]
-  [[tls.certificates]]
-    certFile = "/etc/traefik/certs/gitlab.lan-fullchain.crt"
-    keyFile = "/etc/traefik/certs/gitlab.lan.key"
