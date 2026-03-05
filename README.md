@@ -2,23 +2,20 @@
 
 Docker Compose setup for a self-hosted GitLab CE instance with Traefik as reverse proxy and optional GitLab Runner.
 
-## Services
+## Containers
 
 ### Core services
 
-| Service | Description |
+| Container | Description |
 |---------|-------------|
 | `gitlab` | GitLab CE — git hosting, merge requests, CI/CD orchestration, Container Registry |
 | `traefik` | Reverse proxy — TLS termination, routing to `GITLAB_DOMAIN` and `REGISTRY_DOMAIN` |
 
 ### GitLab Runner
 
-| | |
-|---|---|
-| Profile | opt-in via `COMPOSE_PROFILES=runner` |
-| Executor | Docker privileged (Docker-in-Docker) |
-| Registration | Automatic on first start using `RUNNER_TOKEN` |
-| Config file | `gitlab-runner/config/config.toml` — auto-generated, not tracked in git |
+| Container | Description |
+|-----------|-------------|
+| `gitlab-runner` | Docker-privileged CI/CD runner — opt-in via `COMPOSE_PROFILES=runner` |
 
 See [doc/RUNNER.md](doc/RUNNER.md) for token setup and re-registration.
 
@@ -37,7 +34,7 @@ See [doc/RUNNER.md](doc/RUNNER.md) for token setup and re-registration.
 
 ### 1. DNS
 
-These domains do not need public DNS — add them to `/etc/hosts` on the server and on any machine that needs browser access:
+These domains do not need public DNS — add them to `/etc/hosts` on the server and on any machine that needs browser access or use a DNS config in your network:
 
 ```
 <server-ip>  gitlab.example.com registry.example.com traefik.example.com
@@ -52,7 +49,9 @@ cp .env.example .env
 
 ### 3. TLS certificates
 
-Generate a self-signed cert covering all three domains (or drop in a CA-issued one):
+Generate a self-signed cert covering all three domains, or drop in a CA-issued one.
+
+**Option A — quick self-signed (openssl):**
 
 ```bash
 source .env   # loads GITLAB_DOMAIN, REGISTRY_DOMAIN, TRAEFIK_DOMAIN
@@ -62,8 +61,18 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 365 -nodes \
   -out    traefik/certs/server-fullchain.crt \
   -subj   "/CN=${GITLAB_DOMAIN}" \
   -addext "subjectAltName=DNS:${GITLAB_DOMAIN},DNS:${REGISTRY_DOMAIN},DNS:${TRAEFIK_DOMAIN}"
+```
 
-# Copy cert to runner (needed for TLS verification against GitLab)
+**Option B — private CA + signed cert ([Certgen](https://github.com/Mstaaravin/Certgen)):**
+
+```bash
+# Creates a local CA and issues a cert with the correct SANs in one step.
+# See the Certgen README for usage.
+```
+
+Either way, copy the cert to the runner directory:
+
+```bash
 mkdir -p gitlab-runner/config/certs
 cp traefik/certs/server-fullchain.crt gitlab-runner/config/certs/${GITLAB_DOMAIN}.crt
 ```

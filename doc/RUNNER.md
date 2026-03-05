@@ -9,7 +9,7 @@ This setup includes an optional GitLab Runner that uses a **Docker executor in p
   ```
   gitlab-runner/config/certs/<GITLAB_DOMAIN>.crt
   ```
-  This is the same certificate used by Traefik and GitLab. The runner uses it to verify the GitLab TLS connection, since the certificate is self-signed or issued by a private CA.
+  This is the same certificate served by Traefik. The runner needs it to verify the GitLab TLS connection when the cert is self-signed or issued by a private CA. It is copied there as part of the main setup (README step 3).
 - `GITLAB_IP` must be set in `.env` to the static IP of the host running GitLab. The runner container cannot use DNS to resolve `GITLAB_DOMAIN` — it uses `extra_hosts` to inject a host entry directly.
 
 ## Getting the registration token
