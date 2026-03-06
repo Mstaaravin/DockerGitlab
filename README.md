@@ -67,7 +67,7 @@ traefik/certs/wildcard.homelab.local.key.rename   ← rename to .key before use
 If you're using the default `homelab.local` domains, skip to step 4 after running:
 
 ```bash
-# Activate the private key
+# Restore the private key (excluded from git, generated from the .rename file)
 cp traefik/certs/wildcard.homelab.local.key.rename traefik/certs/wildcard.homelab.local.key
 
 # Copy cert for the runner
