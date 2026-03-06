@@ -3633,21 +3633,26 @@ puma['max_threads'] = 4
 puma['per_worker_max_memory_mb'] = 1200
 
 # Sidekiq (background jobs): homelab no necesita alta concurrencia
-sidekiq['concurrency'] = 8
+sidekiq['concurrency'] = 5
 
 # PostgreSQL
-postgresql['shared_buffers'] = "512MB"
-postgresql['work_mem'] = "16MB"
+postgresql['max_connections'] = 100
+postgresql['shared_buffers'] = "256MB"
+postgresql['work_mem'] = "8MB"
 postgresql['maintenance_work_mem'] = "64MB"
 postgresql['checkpoint_completion_target'] = 0.9
-postgresql['effective_cache_size'] = "4GB"
+postgresql['effective_cache_size'] = "1GB"
 
 # Servicios de monitoreo — desactivar los que no se usan
-# (ahorran ~300-400MB RAM en total)
 prometheus['enable'] = false
 alertmanager['enable'] = false
 gitlab_exporter['enable'] = false
 node_exporter['enable'] = false
+postgres_exporter['enable'] = false
+redis_exporter['enable'] = false
+
+# GitLab Pages — desactivar si no se usa
+gitlab_pages['enable'] = false
 
 # GitLab KAS (Kubernetes Agent Server) — no aplica en homelab
 gitlab_kas['enable'] = false
