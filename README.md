@@ -65,9 +65,8 @@ traefik/certs/wildcard.homelab.local.key
 If you're using the default `homelab.local` domains, skip to step 4. Just copy the cert for the runner:
 
 ```bash
-source .env
 mkdir -p gitlab-runner/config/certs
-cp traefik/certs/wildcard.homelab.local-fullchain.crt gitlab-runner/config/certs/${GITLAB_DOMAIN}.crt
+cp traefik/certs/wildcard.homelab.local-fullchain.crt gitlab-runner/config/certs/gitlab.homelab.local.crt
 ```
 
 #### Bring your own certificates
