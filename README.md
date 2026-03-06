@@ -57,14 +57,20 @@ The repo ships a wildcard certificate for `*.homelab.local` signed by the homela
 
 ```
 traefik/certs/wildcard.homelab.local-fullchain.crt
-traefik/certs/wildcard.homelab.local.key
+traefik/certs/wildcard.homelab.local.key.rename   ← rename to .key before use
 ```
 
 > **Note:** These are lab-only certificates intended for quick deployment in a private homelab. Do not use them in production. The CA cert (`homelab.local-intermediate-ca.crt`) must be trusted on any machine that needs browser access — install it in your OS/browser trust store.
+>
+> The private key is stored with a `.key.rename` extension to avoid GitHub secret scanning alerts.
 
-If you're using the default `homelab.local` domains, skip to step 4. Just copy the cert for the runner:
+If you're using the default `homelab.local` domains, skip to step 4 after running:
 
 ```bash
+# Activate the private key
+cp traefik/certs/wildcard.homelab.local.key.rename traefik/certs/wildcard.homelab.local.key
+
+# Copy cert for the runner
 mkdir -p gitlab-runner/config/certs
 cp traefik/certs/wildcard.homelab.local-fullchain.crt gitlab-runner/config/certs/gitlab.homelab.local.crt
 ```

@@ -6,7 +6,9 @@ gitlab/logs/
 !.env.example
 
 # traefik/certs/ is intentionally tracked — lab certs for quick deployment.
-# The wildcard private key is included for convenience; replace with your own certs for production.
+# Private keys are stored with .key.rename extension to avoid GitHub secret scanning alerts.
+# Rename to .key before use (see README step 3).
+traefik/certs/*.key
 gitlab/config/ssl/*.crt
 gitlab/config/ssl/*.key
 

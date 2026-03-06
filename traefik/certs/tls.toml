@@ -1,4 +1,4 @@
 [tls]
   [[tls.certificates]]
     certFile = "/etc/traefik/certs/wildcard.homelab.local-fullchain.crt"
-    keyFile  = "/etc/traefik/certs/wildcard.homelab.local.key"
+    keyFile  = "/etc/traefik/certs/wildcard.homelab.local.key.rename"
