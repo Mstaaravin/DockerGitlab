@@ -2,6 +2,16 @@
 
 Docker Compose setup for a self-hosted GitLab CE instance with Traefik as reverse proxy and optional GitLab Runner.
 
+## Table of contents
+
+- [Containers](#containers)
+- [Requirements](#requirements)
+- [Setup](#setup)
+- [Runner (optional)](#runner-optional)
+- [Configuration split: `GITLAB_OMNIBUS_CONFIG` vs `gitlab.rb`](#configuration-split-gitlab_omnibus_config-vs-gitlabrb)
+- [Performance tuning](#performance-tuning)
+- [Notes](#notes)
+
 ## Containers
 
 ### Core services
@@ -136,6 +146,29 @@ These settings live here for two reasons:
 **What goes in `gitlab.rb`:**
 
 Everything else — SMTP, LDAP, backup schedules, feature flags, resource limits, etc. Static values that don't depend on `.env` and represent GitLab application configuration rather than deployment topology.
+
+## Performance tuning
+
+`gitlab/config/gitlab.rb` includes a tuning block at the end targeting a homelab environment (single user, moderate load). Measured on GitLab 18 with 8 vCPU / 16 GB RAM:
+
+| Component | Setting | Value | Notes |
+|-----------|---------|-------|-------|
+| Puma | `worker_processes` | 1 | Default is 2; each worker ~880 MB RSS. 1 worker saves ~900 MB. |
+| Puma | `max_threads` | 4 | Handles bursts within the single worker. |
+| Puma | `per_worker_max_memory_mb` | 1200 | Worker is restarted if it exceeds this. |
+| Sidekiq | `concurrency` | 5 | Default is 8; lower reduces background job memory pressure. |
+| PostgreSQL | `max_connections` | 100 | Default is 200; unnecessary for single-user homelab. |
+| PostgreSQL | `shared_buffers` | 256 MB | Default is higher; sufficient for small workloads. |
+| Monitoring | prometheus, exporters | disabled | Saves ~200–400 MB; re-enable if you need metrics. |
+| Pages / KAS | `enable` | false | Disabled — not needed in this setup. |
+
+**Result:** GitLab container settles at ~2.5 GiB vs ~3.4 GiB with defaults (~900 MB reduction).
+
+To re-enable any disabled service, set its `enable` key to `true` in `gitlab.rb` and run:
+
+```bash
+docker exec gitlab gitlab-ctl reconfigure
+```
 
 ## Notes
 
