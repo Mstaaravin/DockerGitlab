@@ -3625,9 +3625,9 @@ registry_nginx['listen_https'] = false
 # Performance tuning — 8 CPU / 20GB RAM
 ################################################################################
 
-# Puma (web server): 2 workers × 4 threads
-# Cada worker ~500MB RAM → 2 workers = ~1GB total
-puma['worker_processes'] = 2
+# Puma (web server): 1 worker × 4 threads — suficiente para homelab
+# Con 2 workers: ~2.6GB, con 1 worker: ~1.7GB (~900MB de ahorro)
+puma['worker_processes'] = 1
 puma['min_threads'] = 1
 puma['max_threads'] = 4
 puma['per_worker_max_memory_mb'] = 1200
