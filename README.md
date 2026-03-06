@@ -34,11 +34,13 @@ See [doc/RUNNER.md](doc/RUNNER.md) for token setup and re-registration.
 
 ### 1. DNS
 
-These domains do not need public DNS — add them to `/etc/hosts` on the server and on any machine that needs browser access or use a DNS config in your network:
+The default domains (`gitlab.homelab.local`, `registry.homelab.local`, `traefik.homelab.local`) are resolved via local DNS in the reference homelab. If your network doesn't have DNS for these, add them to `/etc/hosts` on the server and on any client that needs browser access:
 
 ```
-<server-ip>  gitlab.example.com registry.example.com traefik.example.com
+<server-ip>  gitlab.homelab.local registry.homelab.local traefik.homelab.local
 ```
+
+To use different domains, update the three `*_DOMAIN` variables in `.env` and replace the TLS certificates in `traefik/certs/` (see step 3).
 
 ### 2. Environment
 
@@ -49,33 +51,38 @@ cp .env.example .env
 
 ### 3. TLS certificates
 
-Generate a self-signed cert covering all three domains, or drop in a CA-issued one.
+#### Included lab certs (zero-config for homelab.local)
 
-**Option A — quick self-signed (openssl):**
+The repo ships a wildcard certificate for `*.homelab.local` signed by the homelab.local private CA:
 
-```bash
-source .env   # loads GITLAB_DOMAIN, REGISTRY_DOMAIN, TRAEFIK_DOMAIN
-
-openssl req -x509 -newkey rsa:4096 -sha256 -days 365 -nodes \
-  -keyout traefik/certs/server.key \
-  -out    traefik/certs/server-fullchain.crt \
-  -subj   "/CN=${GITLAB_DOMAIN}" \
-  -addext "subjectAltName=DNS:${GITLAB_DOMAIN},DNS:${REGISTRY_DOMAIN},DNS:${TRAEFIK_DOMAIN}"
+```
+traefik/certs/wildcard.homelab.local-fullchain.crt
+traefik/certs/wildcard.homelab.local.key
 ```
 
-**Option B — private CA + signed cert ([Certgen](https://github.com/Mstaaravin/Certgen)):**
+> **Note:** These are lab-only certificates intended for quick deployment in a private homelab. Do not use them in production. The CA cert (`homelab.local-intermediate-ca.crt`) must be trusted on any machine that needs browser access — install it in your OS/browser trust store.
+
+If you're using the default `homelab.local` domains, skip to step 4. Just copy the cert for the runner:
 
 ```bash
-# Creates a local CA and issues a cert with the correct SANs in one step.
-# See the Certgen README for usage.
-```
-
-Either way, copy the cert to the runner directory:
-
-```bash
+source .env
 mkdir -p gitlab-runner/config/certs
-cp traefik/certs/server-fullchain.crt gitlab-runner/config/certs/${GITLAB_DOMAIN}.crt
+cp traefik/certs/wildcard.homelab.local-fullchain.crt gitlab-runner/config/certs/${GITLAB_DOMAIN}.crt
 ```
+
+#### Bring your own certificates
+
+Place your cert and key in `traefik/certs/` and update `traefik/certs/tls.toml` to reference them. Then copy the cert (or fullchain) for the runner:
+
+```bash
+source .env
+mkdir -p gitlab-runner/config/certs
+cp traefik/certs/<your-fullchain.crt> gitlab-runner/config/certs/${GITLAB_DOMAIN}.crt
+```
+
+Options for generating certs:
+- **Self-signed (openssl):** `openssl req -x509 -newkey rsa:4096 -sha256 -days 365 -nodes -keyout traefik/certs/server.key -out traefik/certs/server-fullchain.crt -subj "/CN=${GITLAB_DOMAIN}" -addext "subjectAltName=DNS:${GITLAB_DOMAIN},DNS:${REGISTRY_DOMAIN},DNS:${TRAEFIK_DOMAIN}"`
+- **Private CA:** [Certgen](https://github.com/Mstaaravin/Certgen) — creates a local CA and issues a signed cert in one step.
 
 ### 4. Start
 

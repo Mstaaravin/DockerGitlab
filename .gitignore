@@ -5,9 +5,8 @@ gitlab/logs/
 .env.*
 !.env.example
 
-# Certificates and private keys (environment-specific, deploy via rsync)
-traefik/certs/*.crt
-traefik/certs/*.key
+# traefik/certs/ is intentionally tracked — lab certs for quick deployment.
+# The wildcard private key is included for convenience; replace with your own certs for production.
 gitlab/config/ssl/*.crt
 gitlab/config/ssl/*.key
 
