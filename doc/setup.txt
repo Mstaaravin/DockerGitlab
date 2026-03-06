@@ -72,8 +72,14 @@ docker exec gitlab cat /etc/gitlab/initial_root_password
 # Creates a short-lived PAT using direct DB access (no login required),
 # then calls the GitLab API to register an instance runner.
 
-PAT=$(docker exec gitlab gitlab-rails runner \
-  "t = User.find_by_username('root').personal_access_tokens.create(scopes: ['api'], name: 'setup', expires_at: 1.hour.from_now); puts t.token")
+# The PAT is saved to a temp file to avoid capturing extra whitespace/newlines
+# from the rails runner output when using command substitution over SSH.
+docker exec gitlab gitlab-rails runner \
+  "t = User.find_by_username('root').personal_access_tokens.create(scopes: ['api'], name: 'setup', expires_at: 1.hour.from_now); puts t.token" \
+  2>/dev/null | tr -d '[:space:]' > /tmp/gitlab_pat.txt
+
+PAT=$(cat /tmp/gitlab_pat.txt)
+echo "PAT: $PAT"
 
 RUNNER_TOKEN=$(curl -sk \
   --request POST \
