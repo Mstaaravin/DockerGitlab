@@ -2,6 +2,8 @@
 
 Docker Compose setup for a self-hosted GitLab CE instance with Traefik as reverse proxy and optional GitLab Runner.
 
+**Quick start:** [`doc/setup.txt`](doc/setup.txt) — copy-paste runbook, covers everything from clone to runner.
+
 ## Table of contents
 
 - [Containers](#containers)

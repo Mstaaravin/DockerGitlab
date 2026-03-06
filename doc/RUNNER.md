@@ -14,6 +14,12 @@ This setup includes an optional GitLab Runner that uses a **Docker executor in p
 
 ## Getting the registration token
 
+### Via the setup runbook (recommended)
+
+[`doc/setup.txt`](setup.txt) steps 9–10 handle token creation automatically using the GitLab API — no browser or password needed.
+
+### Via the GitLab UI (manual)
+
 1. Log into GitLab as an administrator.
 2. Go to **Admin Area → CI/CD → Runners** (`/admin/runners`).
 3. Click **New instance runner**.
@@ -23,6 +29,8 @@ This setup includes an optional GitLab Runner that uses a **Docker executor in p
    ```env
    RUNNER_TOKEN=glrt-xxxxxxxxxxxxxxxxxxxx
    ```
+
+> **Note:** GitLab 17+ disables the OAuth password grant by default, so token creation via `curl -d 'grant_type=password'` no longer works. Use the UI or the runbook API flow above.
 
 ## Enabling the runner
 
